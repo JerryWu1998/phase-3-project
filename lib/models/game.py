@@ -1,5 +1,26 @@
-games = [
-    {
+class Game:
+    all_games = []
+
+    def __init__(self, id, title):
+        self.id = id
+        self.title = title
+        self.reviews = []
+
+        Game.all_games.append(self)
+
+    def update_title(self, new_title):
+        self.title = new_title
+
+    def delete(self):
+        Game.all_games.remove(self)
+
+    @staticmethod
+    def list_all():
+        for game in games:
+            print(f"ID: {game['id']}, Title: {game['title']}")
+
+
+games = [{
         'id': 1,
         'title': 'Super Mario',
     },
@@ -78,6 +99,5 @@ games = [
     {
         'id': 20,
         'title': 'Mortal Kombat 11',
-    },
-    # Add more game entries here
+    }
 ]

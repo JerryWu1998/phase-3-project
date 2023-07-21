@@ -1,104 +1,104 @@
+from models.user import User
+from models.game import Game
+from models.review import Review
 
-################ GAME CLASS ################
-class Game:
-    all_games = []
+def create_user(gamertag):
+    User(gamertag)
 
-    def __init__(self, id, title):
-        if any(game.id == id for game in Game.all_games):
-            raise ValueError("Game ID must be unique")
-        self._id = id
-        self.title = title  # use the property setter
-        self.reviews = []
-        Game.all_games.append(self)
+def update_user(old_gamertag, new_gamertag):
+    user = next(user for user in User.all_users if user.gamertag == old_gamertag)
+    user.gamertag = new_gamertag
 
-    @property
-    def id(self):
-        return self._id
+def delete_user(gamertag):
+    user = next(user for user in User.all_users if user.gamertag == gamertag)
+    user.delete()
 
-    @property
-    def title(self):
-        return self._title
+def create_game(id, title):
+    Game(id, title)
 
-    @title.setter
-    def title(self, new_title):
-        if not isinstance(new_title, str) or not new_title.strip():
-            raise ValueError("Title must be a non-empty string")
-        self._title = new_title
+def update_game(id, new_title):
+    game = next(game for game in Game.all_games if game.id == id)
+    game.title = new_title
 
-    def add_review(self, review):
-        if not isinstance(review, Review):
-            raise ValueError("Review must be an instance of the Review class")
-        if review in self.reviews:
-            raise ValueError("Duplicate review for this game")
-        self.reviews.append(review)
+def delete_game(id):
+    game = next(game for game in Game.all_games if game.id == id)
+    game.delete()
 
-    def calculate_average_rating(self):
-        if not self.reviews:
-            return 0.0
-        total_ratings = sum(review.rating for review in self.reviews)
-        return round(total_ratings / len(self.reviews), 2)
+def create_review(user_gamertag, game_id, rating, comment=None):
+    user = next(user for user in User.all_users if user.gamertag == user_gamertag)
+    game = next(game for game in Game.all_games if game.id == int(game_id))
+    Review(user, game, int(rating), comment)
 
-################ REVIEW CLASS ################
-class Review:
-    all_reviews = []
+def update_review(user_gamertag, game_id, new_rating, new_comment):
+    review = next(review for review in Review.all_reviews if review.user.gamertag == user_gamertag and review.game.id == int(game_id))
+    review.update_rating(int(new_rating))
+    review.update_comment(new_comment)
 
-    def __init__(self, user, game, rating, comment=None):
-        if not isinstance(rating, int) or not 1 <= rating <= 10:
-            raise ValueError("Rating must be an integer between 1 and 10")
-        if comment and not isinstance(comment, str):
-            raise ValueError("Comment must be a string")
-        self.user = user
-        self.game = game
-        self.rating = rating
-        self.comment = comment
-        Review.all_reviews.append(self)
+def delete_review(user_gamertag, game_id):
+    review = next(review for review in Review.all_reviews if review.user.gamertag == user_gamertag and review.game.id == int(game_id))
+    review.delete()
 
-    def update_rating(self, new_rating):
-        if not isinstance(new_rating, int) or not 1 <= new_rating <= 10:
-            raise ValueError("Rating must be an integer between 1 and 10")
-        self.rating = new_rating
+def list_all_users():
+    for user in User.all_users:
+        print(user.gamertag)
 
-    def update_comment(self, new_comment):
-        if not isinstance(new_comment, str):
-            raise ValueError("Comment must be a string")
-        self.comment = new_comment
+def list_all_games():
+    Game.list_all()
 
-################ USER CLASS ################
-class User:
-    all_users = []
+def list_all_reviews():
+    for review in Review.all_reviews:
+        print(f"{review.user.gamertag} reviewed {review.game.title} - Rating: {review.rating}, Comment: {review.comment}")
 
-    def __init__(self, gamertag):
-        self.gamertag = gamertag  # use the property setter
-        self.owned_games = []
-        User.all_users.append(self)
+COMMANDS = {
+    'create_user': create_user,
+    'update_user': update_user,
+    'delete_user': delete_user,
+    'list_all_users': list_all_users,
+    'create_game': create_game,
+    'update_game': update_game,
+    'delete_game': delete_game,
+    'list_all_games': list_all_games,
+    'create_review': create_review,
+    'update_review': update_review,
+    'delete_review': delete_review,
+    'list_all_reviews': list_all_reviews,
+}
 
-    @property
-    def gamertag(self):
-        return self._gamertag
+def run_cli():
+    while True:
+        print("\nPlease enter a command:")
+        print("create_user - Create a new user")
+        print("update_user - Update an existing user's gamertag")
+        print("delete_user - Delete a user")
+        print("list_all_users - View all users")
+        print("create_game - Create a new game")
+        print("update_game - Update an existing game's title")
+        print("delete_game - Delete a game")
+        print("list_all_games - View all games")
+        print("create_review - Create a new review")
+        print("update_review - Update an existing review's rating and comment")
+        print("delete_review - Delete a review")
+        print("list_all_reviews - View all reviews")
+        print("quit - Quit the program")
+        
+        command = input("> ").strip().lower()
 
-    @gamertag.setter
-    def gamertag(self, new_gamertag):
-        if not isinstance(new_gamertag, str) or not 5 <= len(new_gamertag) <= 20:
-            raise ValueError("Gamertag must be a string between 5 and 20 characters")
-        if any(user.gamertag == new_gamertag for user in User.all_users):
-            raise ValueError("Gamertag must be unique")
-        self._gamertag = new_gamertag
+        if command == "quit":
+            break
 
-    def own_game(self, game):
-        if not isinstance(game, Game):
-            raise ValueError("Game must be an instance of the Game class")
-        if game in self.owned_games:
-            raise ValueError("User already owns this game")
-        self.owned_games.append(game)
+        try:
+            if command in COMMANDS:
+                if "list" in command:
+                    COMMANDS[command]()
+                else:
+                    params = input("Please enter the parameters separated by comma: ")
+                    params = [p.strip() for p in params.split(",")]
+                    COMMANDS[command](*params)
+            else:
+                print(f"Invalid command: {command}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            continue
 
-    def remove_game(self, game):
-        if not isinstance(game, Game):
-            raise ValueError("Game must be an instance of the Game class")
-        if game not in self.owned_games:
-            raise ValueError("User does not own this game")
-        self.owned_games.remove(game)
-
-    def display_owned_games(self):
-        print(f"Owned games for {self.gamertag}:")
-        for game in self.owned_games:
-            print(game.title)
+if __name__ == "__main__":
+    run_cli()
