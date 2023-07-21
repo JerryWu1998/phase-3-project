@@ -1,3 +1,4 @@
+
 class Game:
     all_games = []
 
@@ -5,8 +6,14 @@ class Game:
         self.id = id
         self.title = title
         self.reviews = []
-
         Game.all_games.append(self)
+
+    @classmethod
+    def find_by_id(cls, id):
+        for game in cls.all_games:
+            if game.id == id:
+                return game
+        return None
 
     def update_title(self, new_title):
         self.title = new_title
@@ -16,10 +23,14 @@ class Game:
 
     @staticmethod
     def list_all():
-        for game in games:
-            print(f"ID: {game['id']}, Title: {game['title']}")
+        for game in Game.all_games:
+            print(f"ID: {game.id}, Title: {game.title}")
+
+    def __repr__(self):
+        return f"Game(id={self.id}, title='{self.title}')"
 
 
+# Define the games data within the same file
 games = [{
         'id': 1,
         'title': 'Super Mario',
@@ -101,3 +112,7 @@ games = [{
         'title': 'Mortal Kombat 11',
     }
 ]
+
+# Create Game objects and populate the all_games list
+for game_data in games:
+    Game(game_data['id'], game_data['title'])

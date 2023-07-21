@@ -1,5 +1,5 @@
-from .game import Game
-from .review import Review
+from models.game import *
+from models.review import Review
 
 class User:
     all_users = []
@@ -67,6 +67,7 @@ class User:
         for user in cls.all_users:
             print(user.gamertag)
 
+
 users = [
     {
         'gamertag': 'JohnDoe',
@@ -109,3 +110,21 @@ users = [
         'owned_games': [5],
     }
 ]
+
+
+# Create Game instances for owned games of each user
+for user_data in users:
+    User(user_data['gamertag'])
+    gamertag = user_data['gamertag']
+    owned_game_ids = user_data['owned_games']
+
+    for game_id in owned_game_ids:
+        existing_game = next((game for game in Game.all_games if game.id == game_id), None)
+        if existing_game:
+            # If a Game instance with the same ID already exists, skip creating a new one.
+            continue
+
+        # Assuming we have a global list `games` defined with all game data.
+        game_data = next((game for game in games if game['id'] == game_id), None)
+        if game_data:
+            Game(game_id, game_data['title'])
